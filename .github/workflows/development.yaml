@@ -50,9 +50,9 @@ jobs:
       - name: Add image artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ${{format('py{1}-{2}', matrix.py_ver, matrix.distro)}}
+          name: ${{format('py{0}-{1}', matrix.py_ver, matrix.distro)}}
           path: >
-            ${{format('py{1}-{2}.tar.gz', matrix.py_ver, matrix.distro)}}
+            ${{format('py{0}-{1}.tar.gz', matrix.py_ver, matrix.distro)}}
           retention-days: 1
   test:
     needs: build
@@ -84,7 +84,7 @@ jobs:
       - name: Fetch image artifact
         uses: actions/download-artifact@v2
         with:
-          name: ${{format('py{1}-{2}', matrix.py_ver, matrix.distro)}}
+          name: ${{format('py{0}-{1}', matrix.py_ver, matrix.distro)}}
       - name: Run integration tests
         run: |
           docker load < "py${PY_VER}-${DISTRO}.tar.gz"
@@ -121,7 +121,7 @@ jobs:
       - name: Fetch image artifact
         uses: actions/download-artifact@v2
         with:
-          name: ${{format('py{1}-{2}', matrix.py_ver, matrix.distro)}}
+          name: ${{format('py{0}-{1}', matrix.py_ver, matrix.distro)}}
       - name: Publish image
         run: |
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
