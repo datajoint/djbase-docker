@@ -1,80 +1,61 @@
 ARG BASE_IMAGE_HASH
 ARG CONDA_VER
 ARG PY_VER
-
-#Temp Image to create exec to allow UID/GID to be updated on boot
-FROM golang:alpine3.11 as go_tmp
-COPY ./utilities/startup.go /startup.go
-RUN cd / && go build startup.go
-
-FROM datajoint/miniconda3:${CONDA_VER}-py${PY_VER}-alpine3.11-${BASE_IMAGE_HASH} as py_build
-# # datajoint admin (dja) mapped to docker host user
-USER root
-RUN export uid=3000 gid=$(awk -F':' '/^anaconda/{print $3}' /etc/group) && \
-    mkdir -p /home/dja && \
-    mkdir /main && \
-    echo "dja:x:${uid}:${gid}:Developer,,,:/home/dja:/bin/sh" >> /etc/passwd && \
-    # echo "dja:x:${uid}:" >> /etc/group && \
-    chown ${uid}:${gid} -R /home/dja && \
-    chown ${uid}:${gid} -R /main
+FROM datajoint/miniconda3:${CONDA_VER}-py${PY_VER}-alpine-${BASE_IMAGE_HASH} as py_build
 
 LABEL maintainerName="Raphael Guzman" \
-      maintainerEmail="raphael@vathes.com" \
-      maintainerCompany="DataJoint"
-
-USER dja:anaconda
-COPY ./utilities/shell_intercept.sh /etc/profile.d/
-
-SHELL ["/bin/sh", "-lc"]
+	maintainerEmail="raphael@datajoint.com" \
+	maintainerCompany="DataJoint"
 
 RUN \
-    umask u+rwx,g+rwx,o-rwx && \
-    export PY_VER=$(python -c "import sys;print(sys.version)" | \
-      head -1 | awk '{print $1}') && \
-    export CONDA_VER=$(conda -V | awk '{print $2}') && \
-    conda config --add channels conda-forge && \
-    conda config --set auto_update_conda False && \
-    conda install -yc conda-forge python=$PY_VER backcall --only-deps && \
-    pip install backcall && \
-    conda install -yc conda-forge python=$PY_VER datajoint --only-deps && \
-    conda clean -ya && \
-    find /opt/conda/conda-meta -user dja -exec chmod u+rwx,g+rwx,o-rwx "{}" \;
+	umask u+rwx,g+rwx,o-rwx && \
+	# https://gist.github.com/yuriburger/f13208717b1878fe835346b9871d0ead
+	echo "graphviz fontconfig msttcorefonts-installer" | \
+		sed 's|\s|\n|g' > /tmp/apk_requirements.txt && \
+	/entrypoint.sh "anaconda" "/home/anaconda" echo done && \
+	export PY_VER=$(python --version 2>&1 | grep -o "\d.\d") && \
+	if echo "$PY_VER" | grep -o "3\.9\|3\.8"; then \
+		pip install --platform=manylinux1_x86_64 --only-binary=:all: \
+			--target=/opt/conda/lib/python${PY_VER}/site-packages \
+			--no-cache-dir matplotlib; \
+	fi && \
+	pip install --no-cache-dir datajoint && \
+	pip uninstall datajoint -y && \
+	rm /tmp/apk_requirements.txt
 
-USER dja:anaconda
-ENV HOME /home/dja
-ENV LANG C.UTF-8
 ENV APK_REQUIREMENTS /tmp/apk_requirements.txt
 ENV PIP_REQUIREMENTS /tmp/pip_requirements.txt
 ENV CONDA_REQUIREMENTS /tmp/conda_requirements.txt
-COPY ./utilities/entrypoint.sh /entrypoint.sh
-COPY --from=go_tmp /startup /startup
 USER root
 RUN \
-  chmod +x /entrypoint.sh && \
-  chmod 4755 /startup
-ENTRYPOINT ["/entrypoint.sh"]
+	# https://gist.github.com/yuriburger/f13208717b1878fe835346b9871d0ead
+	update-ms-fonts && \
+	fc-cache -f && \
+	chmod +x /entrypoint.sh && \
+	chmod 4755 /startup
+USER anaconda:anaconda
+ENTRYPOINT ["/entrypoint.sh", "anaconda", "/home/anaconda"]
 WORKDIR /main
 VOLUME /tmp/.X11-unix
-EXPOSE 8888
-CMD ["/bin/sh", "-l"]
+CMD ["sh"]
 
 
 # #Squashed Final Image
 FROM scratch
 COPY --from=py_build / /
-RUN chmod 4755 /startup && /startup -user=dja
+# RUN chmod 4755 /startup && /startup -user=anaconda
 LABEL maintainerName="Raphael Guzman" \
-      maintainerEmail="raphael@vathes.com" \
-      maintainerCompany="DataJoint"
-USER dja:anaconda
-ENV HOME /home/dja
+	maintainerEmail="raphael@datajoint.com" \
+	maintainerCompany="DataJoint"
+USER anaconda:anaconda
+ENV PATH /opt/conda/bin:$PATH
+ENV ENV "/home/anaconda/.ashrc"
+ENV HOME /home/anaconda
 ENV LANG C.UTF-8
 ENV APK_REQUIREMENTS /tmp/apk_requirements.txt
 ENV PIP_REQUIREMENTS /tmp/pip_requirements.txt
 ENV CONDA_REQUIREMENTS /tmp/conda_requirements.txt
-ENV PATH "/home/dja/.local/bin:/opt/conda/bin:$PATH"
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh", "anaconda", "/home/anaconda"]
 WORKDIR /main
 VOLUME /tmp/.X11-unix
-EXPOSE 8888
-CMD ["/bin/sh", "-l"]
+CMD ["sh"]

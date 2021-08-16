@@ -1,0 +1,175 @@
+name: Development
+on:
+  push:
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - distro: alpine
+            conda_ver: 4.10.3
+            py_ver: 3.9
+          - distro: alpine
+            conda_ver: 4.10.3
+            py_ver: 3.8
+          - distro: alpine
+            conda_ver: 4.10.3
+            py_ver: 3.7
+          - distro: alpine
+            conda_ver: 4.5.4
+            py_ver: 3.6
+          - distro: debian
+            conda_ver: 4.10.3
+            py_ver: 3.9
+          - distro: debian
+            conda_ver: 4.10.3
+            py_ver: 3.8
+          - distro: debian
+            conda_ver: 4.10.3
+            py_ver: 3.7
+          - distro: debian
+            conda_ver: 4.5.4
+            py_ver: 3.6
+    env:
+      DISTRO: ${{matrix.distro}}
+      CONDA_VER: ${{matrix.conda_ver}}
+      PY_VER: ${{matrix.py_ver}}
+      DOCKER_CLIENT_TIMEOUT: "120"
+      COMPOSE_HTTP_TIMEOUT: "120"
+      BASE_IMAGE_HASH: "8281c8f"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Compile image
+        run: |
+          docker-compose -f dist/${DISTRO}/docker-compose.yaml build
+          REF=$(eval "echo $(cat dist/${DISTRO}/docker-compose.yaml | grep 'image:' | \
+              awk '{print $2}')")
+          docker save "${REF}" | gzip > "py${PY_VER}-${DISTRO}.tar.gz"
+      - name: Add image artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{format('py{0}-{1}', matrix.py_ver, matrix.distro)}}
+          path: >
+            ${{format('py{0}-{1}.tar.gz', matrix.py_ver, matrix.distro)}}
+          retention-days: 1
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - distro: alpine
+            py_ver: 3.9
+          - distro: alpine
+            py_ver: 3.8
+          - distro: alpine
+            py_ver: 3.7
+          - distro: alpine
+            py_ver: 3.6
+          - distro: debian
+            py_ver: 3.9
+          - distro: debian
+            py_ver: 3.8
+          - distro: debian
+            py_ver: 3.7
+          - distro: debian
+            py_ver: 3.6
+    env:
+      DISTRO: ${{matrix.distro}}
+      PY_VER: ${{matrix.py_ver}}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Fetch image artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{format('py{0}-{1}', matrix.py_ver, matrix.distro)}}
+      - name: Run integration tests
+        run: |
+          docker load < "py${PY_VER}-${DISTRO}.tar.gz"
+          tests/main.sh
+  publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - distro: alpine
+            py_ver: 3.9
+          - distro: alpine
+            py_ver: 3.8
+          - distro: alpine
+            py_ver: 3.7
+          - distro: alpine
+            py_ver: 3.6
+          - distro: debian
+            py_ver: 3.9
+          - distro: debian
+            py_ver: 3.8
+          - distro: debian
+            py_ver: 3.7
+          - distro: debian
+            py_ver: 3.6
+    env:
+      DISTRO: ${{matrix.distro}}
+      PY_VER: ${{matrix.py_ver}}
+      DOCKER_USERNAME: ${{secrets.docker_username}}
+      DOCKER_PASSWORD: ${{secrets.docker_password}}
+    steps:
+      - name: Fetch image artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{format('py{0}-{1}', matrix.py_ver, matrix.distro)}}
+      - name: Publish image
+        run: |
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker load < "py${PY_VER}-${DISTRO}.tar.gz"
+          REF=$(eval "echo $(cat dist/${DISTRO}/docker-compose.yaml | grep 'image:' | \
+              awk '{print $2}')")
+          TAG=$(echo $REF | awk -F':' '{print $2}')
+          IMAGE=$(echo $REF | awk -F':' '{print $1}')
+          docker push "${IMAGE}:${TAG}"
+          docker tag "${IMAGE}:${TAG}" "${IMAGE}:${TAG}-${GITHUB_SHA:0:7}"
+          docker push "${IMAGE}:${TAG}-${GITHUB_SHA:0:7}"
+          [ "$PY_VER" == "3.9" ] && [ "$DISTRO" == "debian" ] \
+                  && docker tag "${IMAGE}:${TAG}" "${IMAGE}:latest" \
+                  && docker push "${IMAGE}:latest" \
+              || echo "skipping 'latest' tag..."
+  publish-docs:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build docs
+        uses: ammaraskar/sphinx-action@master
+        with:
+          docs-folder: "docs/"
+      # - name: Upload docs artifact
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: docs-html
+      #     path: docs/_build/html/
+      #     retention-days: 1
+      - name: Commit documentation changes
+        run: |
+          git clone https://github.com/${GITHUB_REPOSITORY}.git \
+              --branch gh-pages --single-branch gh-pages
+          rm -R gh-pages/*
+          cp -r docs/_build/html/* gh-pages/
+          cp .gitignore gh-pages/
+          touch gh-pages/.nojekyll
+          cd gh-pages
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add . --all
+          git commit -m "Update documentation" -a || true
+          # The above command will fail if no changes were present, so we ignore
+          # the return code.
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: gh-pages
+          directory: gh-pages
+          github_token: ${{secrets.GITHUB_TOKEN}}
