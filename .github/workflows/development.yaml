@@ -44,9 +44,9 @@ jobs:
       - name: Compile image
         run: |
           docker-compose -f dist/${DISTRO}/docker-compose.yaml build
-          IMAGE=$(docker images --filter "reference=datajoint/*" --format "{{.Repository}}")
-          TAG=$(docker images --filter "reference=datajoint/*" --format "{{.Tag}}")
-          docker save "${IMAGE}:${TAG}" | gzip > "py${PY_VER}-${DISTRO}.tar.gz"
+          REF=$(eval "echo $(cat dist/${DISTRO}/docker-compose.yaml | grep 'image:' | \
+              awk '{print $2}')")
+          docker save "${REF}" | gzip > "py${PY_VER}-${DISTRO}.tar.gz"
       - name: Add image artifact
         uses: actions/upload-artifact@v2
         with:
@@ -126,8 +126,10 @@ jobs:
         run: |
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
           docker load < "py${PY_VER}-${DISTRO}.tar.gz"
-          IMAGE=$(docker images --filter "reference=datajoint/*" --format "{{.Repository}}")
-          TAG=$(docker images --filter "reference=datajoint/*" --format "{{.Tag}}")
+          REF=$(eval "echo $(cat dist/${DISTRO}/docker-compose.yaml | grep 'image:' | \
+              awk '{print $2}')")
+          TAG=$(echo $REF | awk -F':' '{print $2}')
+          IMAGE=$(echo $REF | awk -F':' '{print $1}')
           docker push "${IMAGE}:${TAG}"
           docker tag "${IMAGE}:${TAG}" "${IMAGE}:${TAG}-${GITHUB_SHA:0:7}"
           docker push "${IMAGE}:${TAG}-${GITHUB_SHA:0:7}"
