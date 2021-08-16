@@ -1,9 +1,136 @@
-<!doctype html>
-<html>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
-    <title>DJBase Title</title>
-  </head>
-  <body>
-    <p>DJBase text.</p>
+    <meta charset="utf-8" />
+    <title>Documentation for the DataJoint’s DJBase Image &#8212; datajoint/djbase 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">datajoint/djbase 0.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="documentation-for-the-datajoint-s-djbase-image">
+<h1>Documentation for the DataJoint’s DJBase Image<a class="headerlink" href="#documentation-for-the-datajoint-s-djbase-image" title="Permalink to this headline">¶</a></h1>
+<div class="line-block">
+<div class="line">A minimal base docker image with <a class="reference external" href="https://github.com/datajoint/datajoint-python">DataJoint Python</a> dependencies installed.</div>
+<div class="line">For more details, have a look at <a class="reference external" href="https://hub.docker.com/r/datajoint/djbase">prebuilt images</a>, <a class="reference external" href="https://github.com/datajoint/djbase-docker">source</a>, and <a class="reference external" href="https://datajoint.github.io/djbase-docker">documentation</a>.</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="launch-locally">
+<h2>Launch Locally<a class="headerlink" href="#launch-locally" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="debian">
+<h3>Debian<a class="headerlink" href="#debian" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker-compose -f dist/debian/docker-compose.yaml --env-file config/.env up --build
+</pre></div>
+</div>
+</div>
+<div class="section" id="alpine">
+<h3>Alpine<a class="headerlink" href="#alpine" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker-compose -f dist/alpine/docker-compose.yaml --env-file config/.env up --build
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Installs <code class="docutils literal notranslate"><span class="pre">datajoint</span></code> dependencies w/o actually installing <code class="docutils literal notranslate"><span class="pre">datajoint</span></code>.</p></li>
+<li><p>Applies image compresssion.</p></li>
+</ul>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>To rebuild and run tests locally, execute the following statements:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span> -a  <span class="c1"># automatically export sourced variables</span>
+. config/.env  <span class="c1"># source config for build and tests</span>
+docker-compose -f dist/<span class="si">${</span><span class="nv">DISTRO</span><span class="si">}</span>/docker-compose.yaml build  <span class="c1"># build image</span>
+tests/main.sh  <span class="c1"># run tests</span>
+<span class="nb">set</span> +a  <span class="c1"># disable auto-export behavior for sourced variables</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="base-image">
+<h2>Base Image<a class="headerlink" href="#base-image" title="Permalink to this headline">¶</a></h2>
+<p>Build is a child of <a class="reference external" href="https://github.com/datajoint/miniconda3-docker">datajoint/miniconda3</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Documentation for the DataJoint’s DJBase Image</a><ul>
+<li><a class="reference internal" href="#launch-locally">Launch Locally</a><ul>
+<li><a class="reference internal" href="#debian">Debian</a></li>
+<li><a class="reference internal" href="#alpine">Alpine</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#features">Features</a></li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#base-image">Base Image</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">datajoint/djbase 0.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Raphael Guzman.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
   </body>
 </html>
