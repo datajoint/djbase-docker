@@ -118,6 +118,7 @@ jobs:
       DOCKER_USERNAME: ${{secrets.docker_username}}
       DOCKER_PASSWORD: ${{secrets.docker_password}}
     steps:
+      - uses: actions/checkout@v2
       - name: Fetch image artifact
         uses: actions/download-artifact@v2
         with:
