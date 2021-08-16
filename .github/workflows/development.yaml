@@ -8,38 +8,37 @@ jobs:
     strategy:
       matrix:
         include:
-          - conda_ver: 4.9.0
+          - distro: alpine
+            conda_ver: 4.10.3
             py_ver: 3.9
-            distro: alpine
-          - conda_ver: 4.8.3
+          - distro: alpine
+            conda_ver: 4.10.3
             py_ver: 3.8
-            distro: alpine
-          - conda_ver: 4.8.3
+          - distro: alpine
+            conda_ver: 4.10.3
             py_ver: 3.7
-            distro: alpine
-          - conda_ver: 4.5.4
+          - distro: alpine
+            conda_ver: 4.5.4
             py_ver: 3.6
-            distro: alpine
-          - conda_ver: 4.9.0
+          - distro: debian
+            conda_ver: 4.10.3
             py_ver: 3.9
-            distro: debian
-          - conda_ver: 4.8.3
+          - distro: debian
+            conda_ver: 4.10.3
             py_ver: 3.8
-            distro: debian
-          - conda_ver: 4.8.3
+          - distro: debian
+            conda_ver: 4.10.3
             py_ver: 3.7
-            distro: debian
-          - conda_ver: 4.5.4
+          - distro: debian
+            conda_ver: 4.5.4
             py_ver: 3.6
-            distro: debian
     env:
+      DISTRO: ${{matrix.distro}}
       CONDA_VER: ${{matrix.conda_ver}}
       PY_VER: ${{matrix.py_ver}}
-      DISTRO: ${{matrix.distro}}
       DOCKER_CLIENT_TIMEOUT: "120"
       COMPOSE_HTTP_TIMEOUT: "120"
-      HOST_UID: "1001"
-      BASE_IMAGE_HASH: "7210574"
+      BASE_IMAGE_HASH: "8281c8f"
     steps:
       - uses: actions/checkout@v2
       - name: Compile image
@@ -61,40 +60,35 @@ jobs:
     strategy:
       matrix:
         include:
-          - py_ver: 3.9
-            distro: alpine
-          - py_ver: 3.8
-            distro: alpine
-          - py_ver: 3.7
-            distro: alpine
-          - py_ver: 3.6
-            distro: alpine
-          - py_ver: 3.9
-            distro: debian
-          - py_ver: 3.8
-            distro: debian
-          - py_ver: 3.7
-            distro: debian
-          - py_ver: 3.6
-            distro: debian
+          - distro: alpine
+            py_ver: 3.9
+          - distro: alpine
+            py_ver: 3.8
+          - distro: alpine
+            py_ver: 3.7
+          - distro: alpine
+            py_ver: 3.6
+          - distro: debian
+            py_ver: 3.9
+          - distro: debian
+            py_ver: 3.8
+          - distro: debian
+            py_ver: 3.7
+          - distro: debian
+            py_ver: 3.6
     env:
-      PY_VER: ${{matrix.py_ver}}
       DISTRO: ${{matrix.distro}}
+      PY_VER: ${{matrix.py_ver}}
     steps:
+      - uses: actions/checkout@v2
       - name: Fetch image artifact
         uses: actions/download-artifact@v2
         with:
           name: ${{format('py{1}-{2}', matrix.py_ver, matrix.distro)}}
-      - name: Verify image
+      - name: Run integration tests
         run: |
           docker load < "py${PY_VER}-${DISTRO}.tar.gz"
-          REF=$(docker images --filter "reference=datajoint/*" \
-                --format "{{.Repository}}:{{.Tag}}")
-          SHELL_CMD=$(docker inspect "$REF" --format '{{join .Config.Cmd " "}}')
-          docker run --rm "$REF" $SHELL_CMD -c "python --version 2>&1" | grep "$PY_VER"
-          docker run --rm "$REF" $SHELL_CMD -c "cat /etc/issue 2>&1" | grep -i "$DISTRO"
-          docker run --rm "$REF" $SHELL_CMD -c \
-            "pip install datajoint && python -c 'import datajoint as dj;print(dj.__version__)'"
+          tests/main.sh
   publish:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: test
@@ -102,25 +96,25 @@ jobs:
     strategy:
       matrix:
         include:
-          - py_ver: 3.9
-            distro: alpine
-          - py_ver: 3.8
-            distro: alpine
-          - py_ver: 3.7
-            distro: alpine
-          - py_ver: 3.6
-            distro: alpine
-          - py_ver: 3.9
-            distro: debian
-          - py_ver: 3.8
-            distro: debian
-          - py_ver: 3.7
-            distro: debian
-          - py_ver: 3.6
-            distro: debian
+          - distro: alpine
+            py_ver: 3.9
+          - distro: alpine
+            py_ver: 3.8
+          - distro: alpine
+            py_ver: 3.7
+          - distro: alpine
+            py_ver: 3.6
+          - distro: debian
+            py_ver: 3.9
+          - distro: debian
+            py_ver: 3.8
+          - distro: debian
+            py_ver: 3.7
+          - distro: debian
+            py_ver: 3.6
     env:
-      PY_VER: ${{matrix.py_ver}}
       DISTRO: ${{matrix.distro}}
+      PY_VER: ${{matrix.py_ver}}
       DOCKER_USERNAME: ${{secrets.docker_username}}
       DOCKER_PASSWORD: ${{secrets.docker_password}}
     steps:
