@@ -65,7 +65,7 @@
 <p>To rebuild and run tests locally, execute the following statements:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span> -a  <span class="c1"># automatically export sourced variables</span>
 . config/.env  <span class="c1"># source config for build and tests</span>
-docker-compose -f dist/<span class="si">${</span><span class="nv">DISTRO</span><span class="si">}</span>/docker-compose.yaml build  <span class="c1"># build image</span>
+docker buildx bake -f dist/<span class="si">${</span><span class="nv">DISTRO</span><span class="si">}</span>/docker-compose.yaml --set *.platform<span class="o">=</span><span class="si">${</span><span class="nv">PLATFORM</span><span class="si">}</span> --set *.context<span class="o">=</span>. --load <span class="c1"># build image</span>
 tests/main.sh  <span class="c1"># run tests</span>
 <span class="nb">set</span> +a  <span class="c1"># disable auto-export behavior for sourced variables</span>
 </pre></div>
