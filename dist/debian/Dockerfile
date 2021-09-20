@@ -9,8 +9,8 @@ LABEL maintainerName="Raphael Guzman" \
 
 RUN \
 	umask u+rwx,g+rwx,o-rwx && \
-	echo 'graphviz' > /tmp/apt_requirements.txt && \
-	/entrypoint.sh "anaconda" "/home/anaconda" echo done && \
+	echo 'graphviz' > $APT_REQUIREMENTS && \
+	/entrypoint.sh echo done && \
 	export PY_VER=$(python --version 2>&1 | grep -o "\d.\d") && \
 	if echo "$PY_VER" | grep -oP "3\.9\|3\.8"; then \
 		pip install --platform=manylinux1_x86_64 --only-binary=:all: \
@@ -22,7 +22,7 @@ RUN \
 	# decorator package had a conflict so installing again to force resolve
 	pip install datajoint --no-cache-dir && \
 	pip uninstall datajoint -y && \
-	rm /tmp/apt_requirements.txt
+	rm $APT_REQUIREMENTS
 
 ENV APT_REQUIREMENTS /tmp/apt_requirements.txt
 ENV PIP_REQUIREMENTS /tmp/pip_requirements.txt
@@ -32,28 +32,26 @@ RUN \
 	chmod +x /entrypoint.sh && \
 	chmod 4755 /startup
 USER anaconda:anaconda
-ENTRYPOINT ["/entrypoint.sh", "anaconda", "/home/anaconda"]
+ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /main
 VOLUME /tmp/.X11-unix
 CMD ["bash"]
 
 
-# #Squashed Final Image
+# Squashed Final Image
 FROM scratch
 COPY --from=py_build / /
-# RUN chmod 4755 /startup && /startup -user=anaconda
 LABEL maintainerName="Raphael Guzman" \
 	maintainerEmail="raphael@datajoint.com" \
 	maintainerCompany="DataJoint"
 USER anaconda:anaconda
 ENV PATH /opt/conda/bin:$PATH
-RUN conda clean -ya
 ENV HOME /home/anaconda
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV APT_REQUIREMENTS /tmp/apt_requirements.txt
 ENV PIP_REQUIREMENTS /tmp/pip_requirements.txt
 ENV CONDA_REQUIREMENTS /tmp/conda_requirements.txt
-ENTRYPOINT ["/entrypoint.sh", "anaconda", "/home/anaconda"]
+ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /main
 VOLUME /tmp/.X11-unix
 CMD ["bash"]
