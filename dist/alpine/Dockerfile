@@ -11,8 +11,8 @@ RUN \
 	umask u+rwx,g+rwx,o-rwx && \
 	# https://gist.github.com/yuriburger/f13208717b1878fe835346b9871d0ead
 	echo "graphviz fontconfig msttcorefonts-installer" | \
-		sed 's|\s|\n|g' > /tmp/apk_requirements.txt && \
-	/entrypoint.sh "anaconda" "/home/anaconda" echo done && \
+		sed 's|\s|\n|g' > $APK_REQUIREMENTS && \
+	/entrypoint.sh echo done && \
 	export PY_VER=$(python --version 2>&1 | grep -o "\d.\d") && \
 	if echo "$PY_VER" | grep -o "3\.9\|3\.8"; then \
 		pip install --platform=manylinux1_x86_64 --only-binary=:all: \
@@ -21,7 +21,7 @@ RUN \
 	fi && \
 	pip install --no-cache-dir datajoint && \
 	pip uninstall datajoint -y && \
-	rm /tmp/apk_requirements.txt
+	rm $APK_REQUIREMENTS
 
 ENV APK_REQUIREMENTS /tmp/apk_requirements.txt
 ENV PIP_REQUIREMENTS /tmp/pip_requirements.txt
@@ -34,16 +34,15 @@ RUN \
 	chmod +x /entrypoint.sh && \
 	chmod 4755 /startup
 USER anaconda:anaconda
-ENTRYPOINT ["/entrypoint.sh", "anaconda", "/home/anaconda"]
+ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /main
 VOLUME /tmp/.X11-unix
 CMD ["sh"]
 
 
-# #Squashed Final Image
+# Squashed Final Image
 FROM scratch
 COPY --from=py_build / /
-# RUN chmod 4755 /startup && /startup -user=anaconda
 LABEL maintainerName="Raphael Guzman" \
 	maintainerEmail="raphael@datajoint.com" \
 	maintainerCompany="DataJoint"
@@ -55,7 +54,7 @@ ENV LANG C.UTF-8
 ENV APK_REQUIREMENTS /tmp/apk_requirements.txt
 ENV PIP_REQUIREMENTS /tmp/pip_requirements.txt
 ENV CONDA_REQUIREMENTS /tmp/conda_requirements.txt
-ENTRYPOINT ["/entrypoint.sh", "anaconda", "/home/anaconda"]
+ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /main
 VOLUME /tmp/.X11-unix
 CMD ["sh"]
