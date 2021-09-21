@@ -59,7 +59,7 @@ jobs:
       PLATFORM: ${{matrix.platform}}
       DOCKER_CLIENT_TIMEOUT: "120"
       COMPOSE_HTTP_TIMEOUT: "120"
-      BASE_IMAGE_HASH: "344d9f2"
+      BASE_IMAGE_HASH: "5d32230"
     steps:
       - uses: actions/checkout@v2
       - name: Determine platform tag
