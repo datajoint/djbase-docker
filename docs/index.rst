@@ -45,4 +45,4 @@ To rebuild and run tests locally, execute the following statements:
 Base Image
 **********
 
-Build is a child of `datajoint/miniconda3 <https://github.com/datajoint/miniconda3-docker>`_.
+Build is a child of `datajoint/miniconda3 <https://datajoint.github.io/miniconda3-docker/>`_.
