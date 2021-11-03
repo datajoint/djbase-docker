@@ -11,12 +11,12 @@ RUN \
 	umask u+rwx,g+rwx,o-rwx && \
 	echo 'graphviz' > $APT_REQUIREMENTS && \
 	/entrypoint.sh echo done && \
-	export PY_VER=$(python --version 2>&1 | grep -o "\d.\d") && \
+	export PY_VER=$(python --version 2>&1 | grep -oP "\d.\d") && \
 	if echo "$PY_VER" | grep -oP "3\.9\|3\.8"; then \
 		pip install --platform=manylinux1_x86_64 --only-binary=:all: \
 			--target=/opt/conda/lib/python${PY_VER}/site-packages \
 			--no-cache-dir matplotlib; \
-	elif echo "$PY_VER" | grep -o "3\.6"; then \
+	elif echo "$PY_VER" | grep -oP "3\.6"; then \
 		pip install --only-binary=:all: \
 			--target=/opt/conda/lib/python${PY_VER}/site-packages \
 			--no-cache-dir pillow; \
