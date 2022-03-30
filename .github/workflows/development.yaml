@@ -9,6 +9,10 @@ jobs:
       matrix:
         include:
           - distro: alpine
+            conda_ver: 4.12.0
+            py_ver: 3.10
+            platform: linux/amd64
+          - distro: alpine
             conda_ver: 4.10.3
             py_ver: 3.9
             platform: linux/amd64
@@ -23,6 +27,10 @@ jobs:
           - distro: alpine
             conda_ver: 4.5.4
             py_ver: 3.6
+            platform: linux/amd64
+          - distro: debian
+            conda_ver: 4.12.0
+            py_ver: 3.10
             platform: linux/amd64
           - distro: debian
             conda_ver: 4.10.3
@@ -91,6 +99,9 @@ jobs:
       matrix:
         include:
           - distro: alpine
+            py_ver: 3.10
+            platform: linux/amd64
+          - distro: alpine
             py_ver: 3.9
             platform: linux/amd64
           - distro: alpine
@@ -101,6 +112,9 @@ jobs:
             platform: linux/amd64
           - distro: alpine
             py_ver: 3.6
+            platform: linux/amd64
+          - distro: debian
+            py_ver: 3.10
             platform: linux/amd64
           - distro: debian
             py_ver: 3.9
@@ -145,12 +159,21 @@ jobs:
           docker load < "py${PY_VER}-${DISTRO}-${PLATFORM_TAG}.tar.gz"
           tests/main.sh
   publish:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/master' &&
+      (
+        github.repository_owner == 'datajoint' ||
+        github.repository_owner == 'datajoint-company'
+      )
     needs: test
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
+          - distro: alpine
+            py_ver: 3.10
+            platform: linux/amd64
           - distro: alpine
             py_ver: 3.9
             platform: linux/amd64
@@ -162,6 +185,9 @@ jobs:
             platform: linux/amd64
           - distro: alpine
             py_ver: 3.6
+            platform: linux/amd64
+          - distro: debian
+            py_ver: 3.10
             platform: linux/amd64
           - distro: debian
             py_ver: 3.9
@@ -216,7 +242,13 @@ jobs:
                   && docker push "${IMAGE}:latest" \
               || echo "skipping 'latest' tag..."
   publish-docs:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/master' &&
+      (
+        github.repository_owner == 'datajoint' ||
+        github.repository_owner == 'datajoint-company'
+      )
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
