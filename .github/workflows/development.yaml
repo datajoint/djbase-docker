@@ -10,7 +10,7 @@ jobs:
         include:
           - distro: alpine
             conda_ver: 4.12.0
-            py_ver: 3.10
+            py_ver: '3.10'
             platform: linux/amd64
           - distro: alpine
             conda_ver: 4.10.3
@@ -30,7 +30,7 @@ jobs:
             platform: linux/amd64
           - distro: debian
             conda_ver: 4.12.0
-            py_ver: 3.10
+            py_ver: '3.10'
             platform: linux/amd64
           - distro: debian
             conda_ver: 4.10.3
@@ -99,7 +99,7 @@ jobs:
       matrix:
         include:
           - distro: alpine
-            py_ver: 3.10
+            py_ver: '3.10'
             platform: linux/amd64
           - distro: alpine
             py_ver: 3.9
@@ -114,7 +114,7 @@ jobs:
             py_ver: 3.6
             platform: linux/amd64
           - distro: debian
-            py_ver: 3.10
+            py_ver: '3.10'
             platform: linux/amd64
           - distro: debian
             py_ver: 3.9
@@ -172,7 +172,7 @@ jobs:
       matrix:
         include:
           - distro: alpine
-            py_ver: 3.10
+            py_ver: '3.10'
             platform: linux/amd64
           - distro: alpine
             py_ver: 3.9
@@ -187,7 +187,7 @@ jobs:
             py_ver: 3.6
             platform: linux/amd64
           - distro: debian
-            py_ver: 3.10
+            py_ver: '3.10'
             platform: linux/amd64
           - distro: debian
             py_ver: 3.9
