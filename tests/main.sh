@@ -58,11 +58,11 @@ elif [ $DISTRO == alpine ] && [ $PY_VER == '3.6' ] && [ $PLATFORM == 'linux/amd6
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.10' ] && [ $PLATFORM == 'linux/amd64' ]; then
 	SIZE_LIMIT=879
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.9' ] && [ $PLATFORM == 'linux/amd64' ]; then
-	SIZE_LIMIT=604 #640
+	SIZE_LIMIT=640 #604 640
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.8' ] && [ $PLATFORM == 'linux/amd64' ]; then
-	SIZE_LIMIT=558  # 833
+	SIZE_LIMIT=599 #558 599  # 833
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.7' ] && [ $PLATFORM == 'linux/amd64' ]; then
-	SIZE_LIMIT=563 #597  # 863
+	SIZE_LIMIT=597 #563 597  # 863
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.6' ] && [ $PLATFORM == 'linux/amd64' ]; then
 	SIZE_LIMIT=496  # 923
 fi
