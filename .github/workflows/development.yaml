@@ -67,7 +67,7 @@ jobs:
       PLATFORM: ${{matrix.platform}}
       DOCKER_CLIENT_TIMEOUT: "120"
       COMPOSE_HTTP_TIMEOUT: "120"
-      BASE_IMAGE_HASH: "72c2c4b"
+      BASE_IMAGE_HASH: "270a9fc"
     steps:
       - uses: actions/checkout@v3
       - name: Determine platform tag
@@ -237,7 +237,7 @@ jobs:
           docker push "${IMAGE}:${TAG}"
           docker tag "${IMAGE}:${TAG}" "${IMAGE}:${TAG}-${GITHUB_SHA:0:7}"
           docker push "${IMAGE}:${TAG}-${GITHUB_SHA:0:7}"
-          [ "$PY_VER" == "3.9" ] && [ "$DISTRO" == "debian" ] \
+          [ "$PY_VER" == "3.11" ] && [ "$DISTRO" == "debian" ] \
                   && docker tag "${IMAGE}:${TAG}" "${IMAGE}:latest" \
                   && docker push "${IMAGE}:latest" \
               || echo "skipping 'latest' tag..."
