@@ -44,32 +44,23 @@ TAG=$(echo $REF | awk -F':' '{print $2}')
 IMAGE=$(echo $REF | awk -F':' '{print $1}')
 SHELL_CMD_TEMPLATE="docker run --rm -i \$SHELL_CMD_FLAGS $REF \
 	$(docker inspect "$REF" --format '{{join .Config.Cmd " "}}') -c"
-# determine reference size
-if [ $DISTRO == alpine ] && [ $PY_VER == '3.11' ] && [ $PLATFORM == 'linux/amd64' ]; then
-	SIZE_LIMIT=774
-elif [ $DISTRO == alpine ] && [ $PY_VER == '3.10' ] && [ $PLATFORM == 'linux/amd64' ]; then
-	SIZE_LIMIT=543
-elif [ $DISTRO == alpine ] && [ $PY_VER == '3.9' ] && [ $PLATFORM == 'linux/amd64' ]; then
-	SIZE_LIMIT=533
-elif [ $DISTRO == alpine ] && [ $PY_VER == '3.8' ] && [ $PLATFORM == 'linux/amd64' ]; then
-	SIZE_LIMIT=516
-elif [ $DISTRO == alpine ] && [ $PY_VER == '3.7' ] && [ $PLATFORM == 'linux/amd64' ]; then
-	SIZE_LIMIT=481
-elif [ $DISTRO == debian ] && [ $PY_VER == '3.11' ] && [ $PLATFORM == 'linux/amd64' ]; then
-	SIZE_LIMIT=897
-elif [ $DISTRO == debian ] && [ $PY_VER == '3.10' ] && [ $PLATFORM == 'linux/amd64' ]; then
-	SIZE_LIMIT=666
-elif [ $DISTRO == debian ] && [ $PY_VER == '3.9' ] && [ $PLATFORM == 'linux/amd64' ]; then
-	SIZE_LIMIT=655
-elif [ $DISTRO == debian ] && [ $PY_VER == '3.8' ] && [ $PLATFORM == 'linux/amd64' ]; then
-	SIZE_LIMIT=638
-elif [ $DISTRO == debian ] && [ $PY_VER == '3.7' ] && [ $PLATFORM == 'linux/amd64' ]; then
-	SIZE_LIMIT=603
-fi
-SIZE_LIMIT=$(echo "scale=4; $SIZE_LIMIT * 1.05" | bc)
-# verify size minimal
-SIZE=$(docker images --filter "reference=$REF" --format "{{.Size}}" | awk -F'MB' '{print $1}')
+# Get the compressed size of the last build from docker hub
+LAST_BUILD_SIZE=$(curl -s https://hub.docker.com/v2/repositories/$IMAGE/tags \
+	| jq -r '.results[] | select(.name=="py'"$PY_VER"'-'"$DISTRO"'") | .images[0].size')
+SIZE_INCRESE_FACTOR=1.5
+SIZE_LIMIT=$(echo "scale=4; $LAST_BUILD_SIZE * $SIZE_INCRESE_FACTOR" | bc)
+# Verify size minimal
+echo Compressing image for size verification...
+docker save $REF | gzip > /tmp/$TAG.tar.gz
+SIZE=$(ls -al /tmp | grep $TAG.tar.gz | awk '{ print $5 }')
+echo -e \
+	Size comparison:\\n\
+	Current size: $(numfmt --to iec --format "%8.4f" $SIZE)\\n\
+	Last build size:  $(numfmt --to iec --format "%8.4f" $LAST_BUILD_SIZE)\\n\
+	Size factor: $SIZE_INCRESE_FACTOR\\n\
+	Size limit: $(numfmt --to iec --format "%8.4f" $SIZE_LIMIT)
 assert "minimal footprint" "(( $(echo "$SIZE <= $SIZE_LIMIT" | bc -l) ))" $LINENO
+rm /tmp/$TAG.tar.gz
 # run tests
 SHELL_CMD=$(eval "echo \"$SHELL_CMD_TEMPLATE\"")
 validate
