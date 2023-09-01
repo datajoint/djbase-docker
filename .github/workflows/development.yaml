@@ -1,7 +1,10 @@
 name: Development
 on:
   push:
-  pull_request:
+    tags:
+      - '*.*.*'
+  # pull_request:
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -9,57 +12,37 @@ jobs:
       matrix:
         include:
           - distro: alpine
-            conda_ver: '22.11.1'
+            conda_ver: '23.5.2'
             py_ver: '3.11'
             platform: linux/amd64
           - distro: alpine
-            conda_ver: '22.11.1'
+            conda_ver: '23.5.2'
             py_ver: '3.10'
             platform: linux/amd64
           - distro: alpine
-            conda_ver: '22.11.1'
+            conda_ver: '23.5.2'
             py_ver: '3.9'
             platform: linux/amd64
           - distro: alpine
-            conda_ver: '22.11.1'
+            conda_ver: '23.5.2'
             py_ver: '3.8'
             platform: linux/amd64
-          - distro: alpine
-            conda_ver: '22.11.1'
-            py_ver: '3.7'
-            platform: linux/amd64
           - distro: debian
-            conda_ver: '22.11.1'
+            conda_ver: '23.5.2'
             py_ver: '3.11'
             platform: linux/amd64
           - distro: debian
-            conda_ver: '22.11.1'
+            conda_ver: '23.5.2'
             py_ver: '3.10'
             platform: linux/amd64
           - distro: debian
-            conda_ver: '22.11.1'
+            conda_ver: '23.5.2'
             py_ver: '3.9'
             platform: linux/amd64
           - distro: debian
-            conda_ver: '22.11.1'
+            conda_ver: '23.5.2'
             py_ver: '3.8'
             platform: linux/amd64
-          - distro: debian
-            conda_ver: '22.11.1'
-            py_ver: '3.7'
-            platform: linux/amd64
-          # - distro: debian
-          #   conda_ver: 4.10.3
-          #   py_ver: 3.9
-          #   platform: linux/arm64
-          # - distro: debian
-          #   conda_ver: 4.10.3
-          #   py_ver: 3.8
-          #   platform: linux/arm64
-          # - distro: debian
-          #   conda_ver: 4.10.3
-          #   py_ver: 3.7
-          #   platform: linux/arm64
     env:
       DISTRO: ${{matrix.distro}}
       CONDA_VER: ${{matrix.conda_ver}}
@@ -110,9 +93,6 @@ jobs:
           - distro: alpine
             py_ver: '3.8'
             platform: linux/amd64
-          - distro: alpine
-            py_ver: '3.7'
-            platform: linux/amd64
           - distro: debian
             py_ver: '3.11'
             platform: linux/amd64
@@ -125,18 +105,6 @@ jobs:
           - distro: debian
             py_ver: '3.8'
             platform: linux/amd64
-          - distro: debian
-            py_ver: '3.7'
-            platform: linux/amd64
-          # - distro: debian
-          #   py_ver: 3.9
-          #   platform: linux/arm64
-          # - distro: debian
-          #   py_ver: 3.8
-          #   platform: linux/arm64
-          # - distro: debian
-          #   py_ver: 3.7
-          #   platform: linux/arm64
     env:
       DISTRO: ${{matrix.distro}}
       PY_VER: ${{matrix.py_ver}}
