@@ -10,6 +10,10 @@ jobs:
         include:
           - distro: alpine
             conda_ver: '22.11.1'
+            py_ver: '3.12'
+            platform: linux/amd64
+          - distro: alpine
+            conda_ver: '22.11.1'
             py_ver: '3.11'
             platform: linux/amd64
           - distro: alpine
@@ -27,6 +31,10 @@ jobs:
           - distro: alpine
             conda_ver: '22.11.1'
             py_ver: '3.7'
+            platform: linux/amd64
+          - distro: debian
+            conda_ver: '22.11.1'
+            py_ver: '3.12'
             platform: linux/amd64
           - distro: debian
             conda_ver: '22.11.1'
@@ -99,6 +107,9 @@ jobs:
       matrix:
         include:
           - distro: alpine
+            py_ver: '3.12'
+            platform: linux/amd64
+          - distro: alpine
             py_ver: '3.11'
             platform: linux/amd64
           - distro: alpine
@@ -112,6 +123,9 @@ jobs:
             platform: linux/amd64
           - distro: alpine
             py_ver: '3.7'
+            platform: linux/amd64
+          - distro: debian
+            py_ver: '3.12'
             platform: linux/amd64
           - distro: debian
             py_ver: '3.11'
@@ -172,6 +186,9 @@ jobs:
       matrix:
         include:
           - distro: alpine
+            py_ver: '3.12'
+            platform: linux/amd64
+          - distro: alpine
             py_ver: '3.11'
             platform: linux/amd64
           - distro: alpine
@@ -185,6 +202,9 @@ jobs:
             platform: linux/amd64
           - distro: alpine
             py_ver: '3.7'
+            platform: linux/amd64
+          - distro: debian
+            py_ver: '3.12'
             platform: linux/amd64
           - distro: debian
             py_ver: '3.11'
@@ -237,7 +257,7 @@ jobs:
           docker push "${IMAGE}:${TAG}"
           docker tag "${IMAGE}:${TAG}" "${IMAGE}:${TAG}-${GITHUB_SHA:0:7}"
           docker push "${IMAGE}:${TAG}-${GITHUB_SHA:0:7}"
-          [ "$PY_VER" == "3.11" ] && [ "$DISTRO" == "debian" ] \
+          [ "$PY_VER" == "3.12" ] && [ "$DISTRO" == "debian" ] \
                   && docker tag "${IMAGE}:${TAG}" "${IMAGE}:latest" \
                   && docker push "${IMAGE}:latest" \
               || echo "skipping 'latest' tag..."
