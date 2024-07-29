@@ -45,7 +45,9 @@ IMAGE=$(echo $REF | awk -F':' '{print $1}')
 SHELL_CMD_TEMPLATE="docker run --rm -i \$SHELL_CMD_FLAGS $REF \
 	$(docker inspect "$REF" --format '{{join .Config.Cmd " "}}') -c"
 # determine reference size
-if [ $DISTRO == alpine ] && [ $PY_VER == '3.11' ] && [ $PLATFORM == 'linux/amd64' ]; then
+if [ $DISTRO == alpine ] && [ $PY_VER == '3.12' ] && [ $PLATFORM == 'linux/amd64' ]; then
+	SIZE_LIMIT=774
+elif [ $DISTRO == alpine ] && [ $PY_VER == '3.11' ] && [ $PLATFORM == 'linux/amd64' ]; then
 	SIZE_LIMIT=774
 elif [ $DISTRO == alpine ] && [ $PY_VER == '3.10' ] && [ $PLATFORM == 'linux/amd64' ]; then
 	SIZE_LIMIT=543
@@ -55,6 +57,8 @@ elif [ $DISTRO == alpine ] && [ $PY_VER == '3.8' ] && [ $PLATFORM == 'linux/amd6
 	SIZE_LIMIT=516
 elif [ $DISTRO == alpine ] && [ $PY_VER == '3.7' ] && [ $PLATFORM == 'linux/amd64' ]; then
 	SIZE_LIMIT=481
+elif [ $DISTRO == debian ] && [ $PY_VER == '3.12' ] && [ $PLATFORM == 'linux/amd64' ]; then
+	SIZE_LIMIT=897
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.11' ] && [ $PLATFORM == 'linux/amd64' ]; then
 	SIZE_LIMIT=897
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.10' ] && [ $PLATFORM == 'linux/amd64' ]; then
